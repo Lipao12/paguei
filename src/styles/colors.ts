@@ -1,4 +1,6 @@
 export const colors = {
+  background: "#F5F5F5",
+
   gray: {
     100: "#FCFDFE",
     200: "#E1EBF4",
@@ -16,7 +18,17 @@ export const colors = {
   },
 
   red: {
+    soft: "#FDEDED",
     light: "#FDEDED",
     base: "#F94144",
+    dark: "#8B1114"
   },
+
+  orange: {
+    light: "#FFF4E5",
+    base: "#F4A261",
+    dark: "#9C5300",
+  },
+
+
 }

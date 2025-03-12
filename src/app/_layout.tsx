@@ -18,6 +18,8 @@ export default function Layout() {
     Rubik_700Bold,
   });
 
+  console.log("Página - Layout");
+
   if (!fontsLoaded) {
     return <Loading />;
   }
@@ -27,7 +29,7 @@ export default function Layout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.gray[100] },
+          contentStyle: { backgroundColor: colors.background },
         }}
       ></Stack>
     </GestureHandlerRootView>

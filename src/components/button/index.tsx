@@ -37,7 +37,7 @@ type IconProps = {
 };
 
 function Icon({ icon: Icon }: IconProps) {
-  return <Icon size={24} color={colors.gray[200]} />;
+  return <Icon size={24} color={colors.green.base} />;
 }
 
 Button.Title = Title;
