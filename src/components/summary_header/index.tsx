@@ -1,9 +1,12 @@
 import { colors } from "@/styles/colors";
-import { fontFamily } from "@/styles/font-family";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, PressableProps, Text, View } from "react-native";
 import { s } from "./style"; // Importando os estilos
+
+type Props = PressableProps & {
+  onSelectMounth: (prev: number) => void;
+};
 
 type FilterType = "Todas" | "A Pagar";
 const months = [
@@ -21,12 +24,13 @@ const months = [
   "Dezembro",
 ];
 
-export function SummaryHeader() {
+export function SummaryHeader({ onSelectMounth }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("Todas");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Pega o mês atual
 
   function handleChangeMonth(direction: "prev" | "next") {
     setCurrentMonth((prev) => {
+      onSelectMounth(prev === 0 ? 11 : prev);
       if (direction === "prev") return prev === 0 ? 11 : prev - 1;
       return prev === 11 ? 0 : prev + 1;
     });
@@ -34,8 +38,8 @@ export function SummaryHeader() {
 
   return (
     <View style={s.container}>
-      <Text style={s.headerTitle}>Resumo Financeiro</Text>
       {/* Título + Navegação */}
+      <Text style={s.headerTitle}>Resumo Financeiro</Text>
       <View style={s.headerRow}>
         <Pressable onPress={() => handleChangeMonth("prev")}>
           <Ionicons name="chevron-back" size={20} color={colors.gray[200]} />
@@ -46,6 +50,10 @@ export function SummaryHeader() {
         <Pressable onPress={() => handleChangeMonth("next")}>
           <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
         </Pressable>
+      </View>
+
+      <View style={{ marginTop: 7 }}>
+        <Text style={[s.monthTitle, { fontSize: 18 }]}>{2025}</Text>
       </View>
 
       {/* Filtros */}

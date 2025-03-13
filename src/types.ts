@@ -4,12 +4,12 @@ export interface Bill {
     category: string;
     amount: number;
     dueDate: string;
-    description?: string;
     paid: boolean;
     reminderAt?: string;
     createdAt: string;
     updatedAt: string;
-    recurring: boolean
+    recurring: boolean;
+    status: string;
   }
   
   export type FilterStatus = "all" | "paid" | "unpaid";

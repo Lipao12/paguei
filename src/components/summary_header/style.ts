@@ -33,7 +33,6 @@ export const s = StyleSheet.create({
     marginHorizontal: 8,
     justifyContent: "center",
     alignItems: "center",
-    transition: "background-color 0.3s ease-in-out",
   },
   activeFilter: {
     backgroundColor: colors.green.base,

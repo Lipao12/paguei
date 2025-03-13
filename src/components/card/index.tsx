@@ -1,45 +1,45 @@
 import { colors } from "@/styles/colors";
-import { categoriesIcons } from "@/utils/categories-icons";
 import {
   IconAlertCircle,
-  IconAlertOctagon,
   IconAlertTriangle,
   IconCircleCheck,
   IconClock,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { Pressable, PressableProps, Text, View } from "react-native";
+import { Alert, Pressable, PressableProps, Text, View } from "react-native";
 import { s } from "./style";
 
 type BillStatus = "Pendente" | "Pago" | "Atrasado";
 
 type Props = PressableProps & {
-  iconId: string;
-  isSelected?: boolean;
+  id: string;
   name: string;
-  value: number;
+  value: string;
   vence: string;
   bill_status: string;
   onToggleStatus: () => void;
+  onDelete: () => void;
 };
 
 export function Card({
+  id,
   name,
   value,
-  iconId,
   vence,
   bill_status,
-  isSelected = false,
+  onDelete,
   ...rest
 }: Props) {
-  const Icon = categoriesIcons[iconId];
-
   // Função para calcular a diferença de dias
   const getDateDifference = (dateString: string) => {
     const currentDate = new Date();
     const dueDate = new Date(dateString);
+
+    currentDate.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
     const timeDiff = dueDate.getTime() - currentDate.getTime();
-    const dayDiff = timeDiff / (1000 * 3600 * 24); // Convertendo para dias
+    const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convertendo para dias
     return dayDiff;
   };
 
@@ -70,13 +70,19 @@ export function Card({
     return data.toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
   };
 
+  const confirmDelete = (id: string) => {
+    Alert.alert("Confirmação", "Tem certeza que deseja excluir esta conta?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Excluir", style: "destructive", onPress: onDelete },
+    ]);
+  };
+
   return (
     <View
       style={[
         s.container,
         bill_status === "Pago" && { borderColor: colors.green.base },
         bill_status === "Atrasado" && { borderColor: colors.red.base },
-        isSelected && s.containerSelected,
       ]}
     >
       <View style={s.infos_container}>
@@ -95,7 +101,11 @@ export function Card({
         <Pressable {...rest} style={s.buttonAction}>
           <ButtonStatusIcon color={ButtonstatusColor} size={24} />
         </Pressable>
-        <Pressable {...rest} style={s.buttonAction}>
+        <Pressable
+          {...rest}
+          style={s.buttonAction}
+          onPress={() => confirmDelete(id)}
+        >
           <IconTrash color={colors.red.base} size={24} />
         </Pressable>
       </View>
