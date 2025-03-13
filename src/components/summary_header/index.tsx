@@ -5,7 +5,11 @@ import { Pressable, PressableProps, Text, View } from "react-native";
 import { s } from "./style"; // Importando os estilos
 
 type Props = PressableProps & {
+  total?: number;
+  paid?: number;
+  toPay?: number;
   onSelectMounth: (prev: number) => void;
+  onSelectFilter: (prev: boolean) => void;
 };
 
 type FilterType = "Todas" | "A Pagar";
@@ -24,16 +28,28 @@ const months = [
   "Dezembro",
 ];
 
-export function SummaryHeader({ onSelectMounth }: Props) {
+export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("Todas");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Pega o mês atual
 
   function handleChangeMonth(direction: "prev" | "next") {
     setCurrentMonth((prev) => {
-      onSelectMounth(prev === 0 ? 11 : prev);
-      if (direction === "prev") return prev === 0 ? 11 : prev - 1;
-      return prev === 11 ? 0 : prev + 1;
+      const newMonth =
+        direction === "prev"
+          ? prev === 0
+            ? 11
+            : prev - 1
+          : prev === 11
+          ? 0
+          : prev + 1;
+      onSelectMounth(newMonth); // Chama o onSelectMounth diretamente com o novo mês
+      return newMonth;
     });
+  }
+
+  function handleChangeFilter(filter: string) {
+    setSelectedFilter(filter as FilterType);
+    onSelectFilter(filter === "Todas" ? false : true);
   }
 
   return (
@@ -65,7 +81,7 @@ export function SummaryHeader({ onSelectMounth }: Props) {
               s.filterButton,
               selectedFilter === filter && s.activeFilter,
             ]}
-            onPress={() => setSelectedFilter(filter as FilterType)}
+            onPress={() => handleChangeFilter(filter)}
           >
             <Text
               style={[s.filterText, selectedFilter === filter && s.activeText]}
@@ -76,23 +92,23 @@ export function SummaryHeader({ onSelectMounth }: Props) {
         ))}
       </View>
 
-      {/* Valores */}
+      {/* Valores 
       <View style={s.valuesContainer}>
         <View style={s.valueBox}>
           <Text style={s.label}>Total:</Text>
-          <Text style={s.value}>R$ 23,65</Text>
+          <Text style={s.value}>R$ {total}</Text>
         </View>
 
         <View style={s.valueBox}>
           <Text style={s.label}>Pago:</Text>
-          <Text style={[s.value, { color: colors.green.base }]}>R$ 0,65</Text>
+          <Text style={[s.value, { color: colors.green.base }]}>R$ {paid}</Text>
         </View>
 
         <View style={s.valueBox}>
           <Text style={s.label}>A Pagar:</Text>
-          <Text style={[s.value, { color: colors.red.dark }]}>R$ 23,00</Text>
+          <Text style={[s.value, { color: colors.red.base }]}>R$ {toPay}</Text>
         </View>
-      </View>
+      </View>*/}
     </View>
   );
 }

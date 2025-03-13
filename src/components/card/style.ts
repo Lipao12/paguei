@@ -4,8 +4,8 @@ import { StyleSheet } from "react-native";
 export const s = StyleSheet.create({
   container: {
     backgroundColor: colors.gray[100],
-    borderWidth: 1,
-    borderColor: colors.gray[300],
+    borderWidth: 2,
+    borderColor: colors.gray[100],
     borderRadius: 8,
     justifyContent: "flex-start",
     alignItems: "flex-start",
@@ -14,6 +14,11 @@ export const s = StyleSheet.create({
     paddingVertical: 10,
     gap: 15,
     marginVertical: 8, // Para dar mais espaçamento entre os cards
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   infos_container: {
     flexDirection: "column",

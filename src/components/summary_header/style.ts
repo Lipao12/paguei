@@ -23,7 +23,7 @@ export const s = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
-    marginVertical: 15,
+    marginTop: 15,
   },
   filterButton: {
     paddingVertical: 8,

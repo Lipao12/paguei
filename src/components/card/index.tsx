@@ -1,7 +1,6 @@
 import { colors } from "@/styles/colors";
 import {
   IconAlertCircle,
-  IconAlertTriangle,
   IconCircleCheck,
   IconClock,
   IconTrash,
@@ -28,6 +27,7 @@ export function Card({
   vence,
   bill_status,
   onDelete,
+  onToggleStatus,
   ...rest
 }: Props) {
   // Função para calcular a diferença de dias
@@ -60,10 +60,11 @@ export function Card({
   const StatusIcon = StatusIconMap[bill_status];
   const statusColorValue = statusColor[bill_status];
 
-  const ButtonStatusIcon =
-    bill_status === "Pago" ? IconAlertTriangle : IconCircleCheck;
+  const ButtonStatusIcon = bill_status === "Pago" ? IconClock : IconCircleCheck;
   const ButtonstatusColor =
-    bill_status === "Pago" ? colors.orange.base : colors.green.base;
+    bill_status === "Pago" ? colors.gray[400] : colors.green.base;
+  const textValueColor =
+    bill_status === "Atrasado" ? colors.red.base : colors.green.base;
 
   const formateData = (dataString: string) => {
     const data = new Date(dataString);
@@ -81,13 +82,15 @@ export function Card({
     <View
       style={[
         s.container,
-        bill_status === "Pago" && { borderColor: colors.green.base },
+        bill_status === "Pago" && {
+          borderColor: colors.green.base,
+        },
         bill_status === "Atrasado" && { borderColor: colors.red.base },
       ]}
     >
       <View style={s.infos_container}>
         <Text style={s.title}>{name}</Text>
-        <Text style={s.moneyText}>R${value}</Text>
+        <Text style={[s.moneyText, { color: textValueColor }]}>R${value}</Text>
         <Text style={s.subtitle}>Vence em {formateData(vence)}</Text>
         <View style={s.statusContainer}>
           {StatusIcon && <StatusIcon color={statusColorValue} size={18} />}
@@ -98,7 +101,7 @@ export function Card({
       </View>
 
       <View style={s.action_buttons}>
-        <Pressable {...rest} style={s.buttonAction}>
+        <Pressable {...rest} style={s.buttonAction} onPress={onToggleStatus}>
           <ButtonStatusIcon color={ButtonstatusColor} size={24} />
         </Pressable>
         <Pressable

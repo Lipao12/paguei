@@ -22,7 +22,7 @@ export default function RegisterBill() {
     router.back();
   };
 
-  const handleDateChange = (event, date) => {
+  const handleDateChange = (_: any, date: Date | undefined) => {
     setShowDatePicker(false);
     if (date) {
       setSelectedDate(date);
@@ -32,6 +32,7 @@ export default function RegisterBill() {
 
   async function onSubmit(data: Bill) {
     setLoading(true);
+    console.log(data);
     try {
       // Verifica se a conta é recorrente
       if (data.recurring) {
@@ -133,15 +134,6 @@ export default function RegisterBill() {
           )}
         />
 
-        <Text style={s.label}>Categoria</Text>
-        <Controller
-          control={control}
-          name="category"
-          render={({ field: { onChange, value } }) => (
-            <TextInput style={s.input} onChangeText={onChange} value={value} />
-          )}
-        />
-
         <Text style={s.label}>Valor (R$)</Text>
         <Controller
           control={control}
@@ -166,7 +158,7 @@ export default function RegisterBill() {
           onTouchEnd={() => setShowDatePicker(true)}
         >
           <Text style={s.dateText}>{formateData(selectedDate.toString())}</Text>
-          <IconCalendarSearch color={colors.gray[400]} />{" "}
+          <IconCalendarSearch color={colors.gray[400]} />
         </View>
         {showDatePicker && (
           <DateTimePicker

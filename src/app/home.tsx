@@ -21,9 +21,12 @@ export default function Index() {
   const router = useRouter();
   const [bills, setBills] = useState<Bill[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState(false);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [paidAmount, setPaidAmount] = useState(0);
+  const [toPayAmount, setToPayAmount] = useState(0);
 
-  console.log(selectedMonth);
+  console.log("Mes selecionado: ", selectedMonth);
 
   /*useEffect(() => {
     async function loadBills() {
@@ -48,14 +51,65 @@ export default function Index() {
         });
       };
 
+      const filterByPaid = (bills: Bill[], filter: boolean): Bill[] => {
+        if (!filter) return bills;
+
+        return bills.filter((bill) => {
+          return !("Pago" === bill.status);
+        });
+      };
+
       async function fetchData() {
         const storedBills = await loadBills(); // Buscar do AsyncStorage ou API
-        const filtered = filterBillsByMonth(storedBills, selectedMonth);
-        setBills(filtered);
+        const filtered = filterByPaid(
+          filterBillsByMonth(storedBills, selectedMonth),
+          selectedFilter
+        );
+
+        console.log("Filtrado: ", filtered);
+
+        // Atualizando status das contas conforme a data de vencimento
+        const updatedBills = filtered.map((bill) => {
+          const dueDate = new Date(bill.dueDate);
+          dueDate.setHours(0, 0, 0, 0);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          console.log(dueDate, today);
+
+          // Se a data de vencimento for menor que hoje e a conta não for paga, marque como "Atrasado"
+          if (dueDate < today && bill.status !== "Pago") {
+            return {
+              ...bill,
+              status: "Atrasado",
+            };
+          }
+
+          return bill;
+        });
+
+        setBills(updatedBills);
+
+        /*let total = 0;
+        let paid = 0;
+        let toPay = 0;
+
+        filtered.forEach((bill) => {
+          total += bill.amount;
+          if (bill.status === "Pago") {
+            paid += bill.amount;
+          } else {
+            toPay += bill.amount;
+          }
+        });
+
+        setTotalAmount(total);
+        setPaidAmount(paid);
+        setToPayAmount(toPay);*/
       }
 
       fetchData();
-    }, [])
+    }, [selectedMonth, selectedFilter])
   );
 
   async function handleDeleteBill(id: string) {
@@ -69,16 +123,40 @@ export default function Index() {
     }
   }
 
-  console.log(bills.length);
+  const toggleBillStatus = (id: string) => {
+    const updatedBills = bills.map((bill) =>
+      bill.id === id
+        ? {
+            ...bill,
+            status: bill.status != "Pago" ? "Pago" : "Pendente",
+          }
+        : bill
+    );
+    setBills(updatedBills);
+
+    AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
+  };
+
+  console.log("Qnt: ", bills.length);
+  console.log("Filter: ", selectedFilter);
 
   return (
     <SafeAreaView style={{ flex: 1, paddingBottom: 40, gap: 40 }}>
-      <SummaryHeader onSelectMounth={setSelectedMonth} />
-      <View style={{ paddingHorizontal: 16, gap: 10, flex: 1 }}>
+      <View style={{ flex: 1, gap: 10 }}>
+        <SummaryHeader
+          onSelectFilter={setSelectedFilter}
+          onSelectMounth={setSelectedMonth}
+          total={totalAmount}
+          paid={paidAmount}
+          toPay={toPayAmount}
+        />
         {bills.length === 0 ? (
-          <EmptyState />
+          <>
+            <EmptyState />
+          </>
         ) : (
           <FlatList
+            style={{ paddingHorizontal: 16 }}
             data={bills}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
@@ -90,7 +168,7 @@ export default function Index() {
                 vence={item.dueDate}
                 bill_status={item.status}
                 onDelete={() => handleDeleteBill(item.id)}
-                onToggleStatus={() => {}}
+                onToggleStatus={() => toggleBillStatus(item.id)}
               />
             )}
           />
