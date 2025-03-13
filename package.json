@@ -16,7 +16,7 @@
     "@expo-google-fonts/rubik": "^0.2.3",
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "^2.1.2",
-    "@react-native-community/datetimepicker": "github:react-native-community/datetimepicker",
+    "@react-native-community/datetimepicker": "^8.2.0",
     "@react-navigation/native": "^7.0.14",
     "@tabler/icons-react-native": "^3.31.0",
     "expo": "~52.0.37",
