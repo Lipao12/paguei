@@ -22,9 +22,9 @@ export default function Index() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedFilter, setSelectedFilter] = useState(false);
-  const [totalAmount, setTotalAmount] = useState(0);
+  /*const [totalAmount, setTotalAmount] = useState(0);
   const [paidAmount, setPaidAmount] = useState(0);
-  const [toPayAmount, setToPayAmount] = useState(0);
+  const [toPayAmount, setToPayAmount] = useState(0);*/
 
   console.log("Mes selecionado: ", selectedMonth);
 
@@ -39,104 +39,68 @@ export default function Index() {
     loadBills();
   }, []);*/
 
+  const filterBillsByMonth = (bills: Bill[], targetMonth: number): Bill[] => {
+    return bills.filter((bill) => {
+      const dueDate = new Date(bill.dueDate);
+      return dueDate.getMonth() === targetMonth;
+    });
+  };
+
+  const filterByPaid = (bills: Bill[], filter: boolean): Bill[] => {
+    if (!filter) return bills;
+    return bills.filter((bill) => bill.status !== "Pago");
+  };
+
+  const updateBillStatus = (bills: Bill[]): Bill[] => {
+    return bills.map((bill) => {
+      const dueDate = new Date(bill.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (dueDate < today && bill.status !== "Pago") {
+        return { ...bill, status: "Atrasado" };
+      }
+      return bill;
+    });
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const filterBillsByMonth = (
-        bills: Bill[],
-        targetMonth: number
-      ): Bill[] => {
-        return bills.filter((bill) => {
-          const dueDate = new Date(bill.dueDate); // Converte a dueDate (string) para Date
-          return dueDate.getMonth() === targetMonth; // Filtra pelo mês
-        });
-      };
-
-      const filterByPaid = (bills: Bill[], filter: boolean): Bill[] => {
-        if (!filter) return bills;
-
-        return bills.filter((bill) => {
-          return !("Pago" === bill.status);
-        });
-      };
-
       async function fetchData() {
-        const storedBills = await loadBills(); // Buscar do AsyncStorage ou API
-        const filtered = filterByPaid(
-          filterBillsByMonth(storedBills, selectedMonth),
-          selectedFilter
-        );
-
-        console.log("Filtrado: ", filtered);
-
-        // Atualizando status das contas conforme a data de vencimento
-        const updatedBills = filtered.map((bill) => {
-          const dueDate = new Date(bill.dueDate);
-          dueDate.setHours(0, 0, 0, 0);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          console.log(dueDate, today);
-
-          // Se a data de vencimento for menor que hoje e a conta não for paga, marque como "Atrasado"
-          if (dueDate < today && bill.status !== "Pago") {
-            return {
-              ...bill,
-              status: "Atrasado",
-            };
-          }
-
-          return bill;
-        });
-
+        const storedBills = await loadBills();
+        const updatedBills = updateBillStatus(storedBills);
         setBills(updatedBills);
-
-        /*let total = 0;
-        let paid = 0;
-        let toPay = 0;
-
-        filtered.forEach((bill) => {
-          total += bill.amount;
-          if (bill.status === "Pago") {
-            paid += bill.amount;
-          } else {
-            toPay += bill.amount;
-          }
-        });
-
-        setTotalAmount(total);
-        setPaidAmount(paid);
-        setToPayAmount(toPay);*/
       }
 
       fetchData();
-    }, [selectedMonth, selectedFilter])
+    }, [])
   );
 
-  async function handleDeleteBill(id: string) {
+  const handleDeleteBill = async (id: string) => {
     try {
       const updatedBills = bills.filter((bill) => bill.id !== id);
-      setBills(updatedBills); // Atualiza o estado imediatamente
-
+      setBills(updatedBills);
       await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
     } catch (error) {
       console.error("Erro ao excluir conta:", error);
     }
-  }
+  };
 
-  const toggleBillStatus = (id: string) => {
+  const toggleBillStatus = async (id: string) => {
     const updatedBills = bills.map((bill) =>
       bill.id === id
-        ? {
-            ...bill,
-            status: bill.status != "Pago" ? "Pago" : "Pendente",
-          }
+        ? { ...bill, status: bill.status !== "Pago" ? "Pago" : "Pendente" }
         : bill
     );
     setBills(updatedBills);
-
-    AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
+    await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
   };
 
+  const filteredBills = filterByPaid(
+    filterBillsByMonth(bills, selectedMonth),
+    selectedFilter
+  );
   console.log("Qnt: ", bills.length);
   console.log("Filter: ", selectedFilter);
 
@@ -146,18 +110,15 @@ export default function Index() {
         <SummaryHeader
           onSelectFilter={setSelectedFilter}
           onSelectMounth={setSelectedMonth}
-          total={totalAmount}
-          paid={paidAmount}
-          toPay={toPayAmount}
         />
-        {bills.length === 0 ? (
+        {filteredBills.length === 0 ? (
           <>
             <EmptyState />
           </>
         ) : (
           <FlatList
             style={{ paddingHorizontal: 16 }}
-            data={bills}
+            data={filteredBills}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <Card

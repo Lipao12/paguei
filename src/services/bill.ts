@@ -34,6 +34,8 @@ export const loadBills = async (): Promise<Bill[]> => {
         const billDate = new Date(bill.dueDate);
         return billDate >= sixMonthsAgo || !bill.paid;
       });
+
+      console.log("As contas: ", filteredBills.length, filteredBills)
   
       // Atualizar armazenamento se houve mudanças
       if (filteredBills.length !== parsedBills.length) {

@@ -14,7 +14,7 @@ export default function RegisterBill() {
   const router = useRouter();
   const { control, handleSubmit, reset } = useForm<Bill>();
   const [loading, setLoading] = useState(false);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  //const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
