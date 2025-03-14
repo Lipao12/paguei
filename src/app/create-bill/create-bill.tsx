@@ -7,10 +7,12 @@ import { IconArrowLeft, IconCalendarSearch } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Alert, Switch, Text, TextInput, View } from "react-native";
 
 export default function RegisterBill() {
   console.log("Page - Create Bill");
+  const { t } = useTranslation("newbill");
   const router = useRouter();
   const { control, handleSubmit, reset } = useForm<Bill>();
   const [loading, setLoading] = useState(false);
@@ -140,15 +142,15 @@ export default function RegisterBill() {
         <Button style={s.buttonBack} onPress={handleBack}>
           <Button.Icon icon={IconArrowLeft} />
         </Button>
-        <Text style={s.title}>Crie Uma Nova Conta</Text>
+        <Text style={s.title}>{t("title")}</Text>
       </View>
 
       <View style={s.formContainer}>
-        <Text style={s.label}>Nome da Conta</Text>
+        <Text style={s.label}>{t("nameLabel")}</Text>
         <Controller
           control={control}
           name="name"
-          rules={{ required: "Informe o nome da conta" }}
+          rules={{ required: t("nameRequired") }}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <>
               <TextInput
@@ -161,11 +163,11 @@ export default function RegisterBill() {
           )}
         />
 
-        <Text style={s.label}>Valor (R$)</Text>
+        <Text style={s.label}>{t("amountLabel")}</Text>
         <Controller
           control={control}
           name="amount"
-          rules={{ required: "Informe o valor" }}
+          rules={{ required: t("amountRequired") }}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <>
               <TextInput
@@ -179,7 +181,7 @@ export default function RegisterBill() {
           )}
         />
 
-        <Text style={s.label}>Data de Vencimento</Text>
+        <Text style={s.label}>{t("dueDateLabel")}</Text>
         <View
           style={s.dateContainer}
           onTouchEnd={() => setShowDatePicker(true)}
@@ -197,7 +199,7 @@ export default function RegisterBill() {
         )}
 
         <View style={s.switchContainer}>
-          <Text style={s.label}>Recorrente</Text>
+          <Text style={s.label}>{t("recurringLabel")}</Text>
           <Controller
             control={control}
             name="recurring"
@@ -213,7 +215,7 @@ export default function RegisterBill() {
         </View>
 
         <View style={s.switchContainer}>
-          <Text style={s.label}>Receber Notificação</Text>
+          <Text style={s.label}>{t("reminderLabel")}</Text>
           <Controller
             control={control}
             name="reminderAt"
@@ -248,7 +250,7 @@ export default function RegisterBill() {
         >
           <Button.Title>
             <Text style={s.buttonText}>
-              {loading ? "Salvando..." : "Cadastrar"}
+              {loading ? t("saving") : t("buttonSubmit")}
             </Text>
           </Button.Title>
         </Button>

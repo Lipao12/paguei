@@ -1,0 +1,10 @@
+{
+    "status_pending": "Pendente",
+      "status_paid": "Pago",
+      "status_overdue": "Atrasado",
+      "due_in": "Vence em",
+      "confirmation": "Confirmação",
+      "delete_confirmation": "Tem certeza que deseja excluir esta conta?",
+      "cancel": "Cancelar",
+      "delete": "Excluir"
+}

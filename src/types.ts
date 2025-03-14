@@ -14,5 +14,5 @@ export interface Bill {
   
   export type FilterStatus = "all" | "paid" | "unpaid";
 
-  export type BillStatus = "Pendente" | "Pago" | "Atrasado";
+  export type BillStatus = "pending" | "paid" | "overdue";
   

@@ -1,0 +1,20 @@
+{
+    "header": {     
+      "title": "Welcome to Paguei!",
+      "subtitle": "Take control of your money. No more late payments!"
+    },
+    "step1": {
+      "title": "Add Your Bills",
+      "description": "Keep track of your bills and never miss a due date again!"
+    },
+    "step2": {
+      "title": "Get Reminders",
+      "description": "Relax! Paguei will give you a heads-up when a bill is coming up."
+    },
+    "step3": {
+      "title": "Mark as Paid",
+      "description": "Stay on top of your finances and check off bills with ease!"
+    },
+    "button": "Let's Start"
+  }
+  

@@ -1,0 +1,10 @@
+{
+    "status_pending": "Pending",
+      "status_paid": "Paid",
+      "status_overdue": "Overdue",
+      "due_in": "Due in",
+      "confirmation": "Confirmation",
+      "delete_confirmation": "Are you sure you want to delete this bill?",
+      "cancel": "Cancel",
+      "delete": "Delete"
+}

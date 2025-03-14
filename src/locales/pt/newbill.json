@@ -1,0 +1,12 @@
+{
+  "title": "Crie Uma Nova Conta",
+  "nameLabel": "Nome da Conta",
+  "nameRequired": "Informe o nome da conta",
+  "amountLabel": "Valor (R$)",
+  "amountRequired": "Informe o valor",
+  "dueDateLabel": "Data de Vencimento",
+  "recurringLabel": "Recorrente",
+  "reminderLabel": "Receber Notificação",
+  "buttonSubmit": "Cadastrar",
+  "saving": "Salvando..."
+}

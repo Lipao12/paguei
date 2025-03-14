@@ -113,7 +113,7 @@ export default function Index() {
 
   const filterByPaid = (bills: Bill[], filter: boolean): Bill[] => {
     if (!filter) return bills;
-    return bills.filter((bill) => bill.status !== "Pago");
+    return bills.filter((bill) => bill.status !== "paid");
   };
 
   const updateBillStatus = (bills: Bill[]): Bill[] => {
@@ -155,7 +155,7 @@ export default function Index() {
   const toggleBillStatus = async (id: string) => {
     const updatedBills = bills.map((bill) =>
       bill.id === id
-        ? { ...bill, status: bill.status !== "Pago" ? "Pago" : "Pendente" }
+        ? { ...bill, status: bill.status !== "paid" ? "paid" : "pending" }
         : bill
     );
     setBills(updatedBills);
@@ -289,7 +289,7 @@ export default function Index() {
                 key={item.id}
                 id={item.id}
                 name={item.name}
-                value={item.amount.toFixed(2)}
+                value={item.amount}
                 vence={item.dueDate}
                 bill_status={item.status}
                 isNotificationsEnabled={!(item.reminderAt === "")}

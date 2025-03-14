@@ -1,8 +1,10 @@
 import { colors } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, PressableProps, Text, View } from "react-native";
-import { s } from "./style"; // Importando os estilos
+import { Button } from "../button";
+import { s } from "./style";
 
 type Props = PressableProps & {
   total?: number;
@@ -12,32 +14,20 @@ type Props = PressableProps & {
   onSelectFilter: (prev: boolean) => void;
 };
 
-type FilterType = "Todas" | "A Pagar";
-const months = [
-  "Janeiro",
-  "Fevereiro",
-  "Março",
-  "Abril",
-  "Maio",
-  "Junho",
-  "Julho",
-  "Agosto",
-  "Setembro",
-  "Outubro",
-  "Novembro",
-  "Dezembro",
-];
+type FilterType = "all" | "toPay";
 
 export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
-  const [selectedFilter, setSelectedFilter] = useState<FilterType>("Todas");
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Pega o mês atual
+  const { t, i18n } = useTranslation("summary");
+
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
 
   useEffect(() => {
     onSelectMounth(currentMonth);
   }, [currentMonth, onSelectMounth]);
 
   useEffect(() => {
-    onSelectFilter(selectedFilter === "A Pagar");
+    onSelectFilter(selectedFilter === "toPay");
   }, [selectedFilter, onSelectFilter]);
 
   function handleChangeMonth(direction: "prev" | "next") {
@@ -50,25 +40,61 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
           : prev === 11
           ? 0
           : prev + 1;
-      //onSelectMounth(newMonth); // Chama o onSelectMounth diretamente com o novo mês
       return newMonth;
     });
   }
 
-  function handleChangeFilter(filter: string) {
-    setSelectedFilter(filter as FilterType);
-    onSelectFilter(filter === "Todas" ? false : true);
+  function handleChangeFilter(filter: FilterType) {
+    setSelectedFilter(filter);
+    onSelectFilter(filter === "toPay");
   }
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "en" ? "pt" : "en";
+    i18n.changeLanguage(newLang);
+  };
+
+  useEffect(() => {
+    toggleLanguage();
+  }, []);
+
+  console.log(t("months"));
+
   return (
     <View style={s.container}>
-      {/* Título + Navegação */}
-      <Text style={s.headerTitle}>Resumo Financeiro</Text>
+      {/* Título */}
+      <View
+        style={{
+          flexDirection: "column",
+          marginHorizontal: 10,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ alignItems: "center" }}>
+          <Text style={[s.headerTitle]}>{t("title")}</Text>
+        </View>
+        <Button
+          onPress={toggleLanguage}
+          style={{
+            height: 20,
+            width: 60,
+            backgroundColor: colors.gray[200],
+          }}
+        >
+          <Button.Title style={{ color: colors.gray[500] }}>
+            Idioma
+          </Button.Title>
+        </Button>
+      </View>
+
+      {/* Navegação de Mês */}
       <View style={s.headerRow}>
         <Pressable onPress={() => handleChangeMonth("prev")}>
           <Ionicons name="chevron-back" size={20} color={colors.gray[200]} />
         </Pressable>
 
-        <Text style={s.monthTitle}>{months[currentMonth]}</Text>
+        <Text style={s.monthTitle}>{t("months")[currentMonth]}</Text>
 
         <Pressable onPress={() => handleChangeMonth("next")}>
           <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />
@@ -76,46 +102,48 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
       </View>
 
       <View style={{ marginTop: 7 }}>
-        <Text style={[s.monthTitle, { fontSize: 18 }]}>{2025}</Text>
+        <Text style={[s.monthTitle, { fontSize: 18 }]}>2025</Text>
       </View>
 
       {/* Filtros */}
       <View style={s.filterContainer}>
-        {["Todas", "A Pagar"].map((filter) => (
+        {["all", "toPay"].map((filter) => (
           <Pressable
             key={filter}
             style={[
               s.filterButton,
               selectedFilter === filter && s.activeFilter,
             ]}
-            onPress={() => handleChangeFilter(filter)}
+            onPress={() => handleChangeFilter(filter as FilterType)}
           >
             <Text
               style={[s.filterText, selectedFilter === filter && s.activeText]}
             >
-              {filter}
+              {t(`filters.${filter}`)}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      {/* Valores 
+      {/* Valores */}
+      {/* 
       <View style={s.valuesContainer}>
         <View style={s.valueBox}>
-          <Text style={s.label}>Total:</Text>
+          <Text style={s.label}>{t("labels.total")}</Text>
           <Text style={s.value}>R$ {total}</Text>
         </View>
 
         <View style={s.valueBox}>
-          <Text style={s.label}>Pago:</Text>
+          <Text style={s.label}>{t("labels.paid")}</Text>
           <Text style={[s.value, { color: colors.green.base }]}>R$ {paid}</Text>
         </View>
 
         <View style={s.valueBox}>
-          <Text style={s.label}>A Pagar:</Text>
+          <Text style={s.label}>{t("labels.toPay")}</Text>
           <Text style={[s.value, { color: colors.red.base }]}>R$ {toPay}</Text>
         </View>
-      </View>*/}
+      </View>
+      */}
     </View>
   );
 }

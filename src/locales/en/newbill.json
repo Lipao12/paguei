@@ -1,0 +1,13 @@
+{
+    "title": "Create a New Bill",
+    "nameLabel": "Account Name",
+    "nameRequired": "Please enter the account name",
+    "amountLabel": "Amount (USD)",
+    "amountRequired": "Please enter the amount",
+    "dueDateLabel": "Due Date",
+    "recurringLabel": "Recurring",
+    "reminderLabel": "Receive Notification",
+    "buttonSubmit": "Register",
+    "saving": "Saving..."
+  }
+  

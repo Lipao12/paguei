@@ -1,0 +1,17 @@
+{
+    "title": "Resumo Financeiro",
+    "months": [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ],
+    "filters": {
+      "all": "Todas",
+      "toPay": "A Pagar"
+    },
+    "labels": {
+      "total": "Total:",
+      "paid": "Pago:",
+      "toPay": "A Pagar:"
+    }
+  }
+  

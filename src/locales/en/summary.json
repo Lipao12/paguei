@@ -1,0 +1,17 @@
+{
+    "title": "Financial Summary",
+    "months": [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ],
+    "filters": {
+      "all": "All",
+      "toPay": "Due"
+    },
+    "labels": {
+      "total": "Total:",
+      "paid": "Paid:",
+      "toPay": "Due:"
+    }
+  }
+  

@@ -4,10 +4,13 @@ import { Welcome } from "@/components/welcome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 export default function Index() {
   console.log("Página - Intex");
+
+  const { t } = useTranslation("onboard");
 
   useEffect(() => {
     const checkFirstAccess = async () => {
@@ -41,7 +44,7 @@ export default function Index() {
           }
         }}
       >
-        <Button.Title>Começar</Button.Title>
+        <Button.Title>{t("button")}</Button.Title>
       </Button>
     </View>
   );

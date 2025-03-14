@@ -1,0 +1,20 @@
+{
+    "header":{
+      "title": "Boas vindas ao Paguei!",
+      "subtitle": "Seu dinheiro no controle. Sem atrasos!"
+    },
+    "step1": {
+      "title": "Cadastre suas contas",
+      "description": "Adicione suas contas e nunca mais esqueça de pagar."
+    },
+    "step2": {
+      "title": "Receba lembretes",
+      "description": "Fique tranquilo! O Paguei avisa quando uma conta estiver perto do vencimento."
+    },
+    "step3": {
+      "title": "Marque como paga",
+      "description": "Mantenha tudo organizado e acompanhe seus pagamentos com facilidade."
+    },
+    "button": "Começar"
+  }
+  

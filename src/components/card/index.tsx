@@ -1,10 +1,12 @@
 import { colors } from "@/styles/colors";
+import { BillStatus } from "@/types";
 import {
   IconAlertCircle,
   IconCircleCheck,
   IconClock,
   IconTrash,
 } from "@tabler/icons-react-native";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Pressable,
@@ -14,12 +16,11 @@ import {
   View,
 } from "react-native";
 import { s } from "./style";
-import { BillStatus } from "@/types";
 
 type Props = PressableProps & {
   id: string;
   name: string;
-  value: string;
+  value: number;
   vence: string;
   bill_status: BillStatus;
   isNotificationsEnabled?: boolean;
@@ -40,6 +41,8 @@ export function Card({
   onSetNotifications,
   ...rest
 }: Props) {
+  const { t, i18n } = useTranslation("card");
+
   // Função para calcular a diferença de dias
   const getDateDifference = (dateString: string) => {
     const currentDate = new Date();
@@ -56,35 +59,50 @@ export function Card({
   const daysUntilDue = getDateDifference(vence);
 
   const StatusIconMap: Record<BillStatus, any> = {
-    Pendente: daysUntilDue <= 5 ? IconClock : null,
-    Pago: IconCircleCheck,
-    Atrasado: IconAlertCircle,
+    pending: daysUntilDue <= 5 ? IconClock : null,
+    paid: IconCircleCheck,
+    overdue: IconAlertCircle,
   };
 
   const statusColor: Record<BillStatus, string> = {
-    Pendente: daysUntilDue <= 5 ? colors.orange.base : colors.gray[500],
-    Pago: colors.green.base,
-    Atrasado: colors.red.base,
+    pending: daysUntilDue <= 5 ? colors.orange.base : colors.gray[500],
+    paid: colors.green.base,
+    overdue: colors.red.base,
   };
 
   const StatusIcon = StatusIconMap[bill_status];
   const statusColorValue = statusColor[bill_status];
 
-  const ButtonStatusIcon = bill_status === "Pago" ? IconClock : IconCircleCheck;
+  const ButtonStatusIcon = bill_status === "paid" ? IconClock : IconCircleCheck;
   const ButtonstatusColor =
-    bill_status === "Pago" ? colors.gray[400] : colors.green.base;
+    bill_status === "paid" ? colors.gray[400] : colors.green.base;
   const textValueColor =
-    bill_status === "Atrasado" ? colors.red.base : colors.green.base;
+    bill_status === "overdue" ? colors.red.base : colors.green.base;
 
   const formateData = (dataString: string) => {
     const data = new Date(dataString);
-    return data.toLocaleDateString("pt-BR", { day: "numeric", month: "long" });
+    return data.toLocaleDateString(i18n.language, {
+      day: "numeric",
+      month: "long",
+    });
   };
 
+  function formateMoney(value: number): string {
+    const currency = i18n.language === "pt" ? "BRL" : "USD";
+    const options: Intl.NumberFormatOptions = {
+      style: "currency",
+      currency: currency,
+    };
+    return value.toLocaleString(
+      i18n.language === "pt" ? "pt-BR" : "en-US",
+      options
+    );
+  }
+
   const confirmDelete = (id: string) => {
-    Alert.alert("Confirmação", "Tem certeza que deseja excluir esta conta?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Excluir", style: "destructive", onPress: onDelete },
+    Alert.alert(t("confirmation"), t("delete_confirmation"), [
+      { text: t("cancel"), style: "cancel" },
+      { text: t("delete"), style: "destructive", onPress: onDelete },
     ]);
   };
 
@@ -92,20 +110,24 @@ export function Card({
     <View
       style={[
         s.container,
-        bill_status === "Pago" && {
+        bill_status === "paid" && {
           borderColor: colors.green.base,
         },
-        bill_status === "Atrasado" && { borderColor: colors.red.base },
+        bill_status === "overdue" && { borderColor: colors.red.base },
       ]}
     >
       <View style={s.infos_container}>
         <Text style={s.title}>{name}</Text>
-        <Text style={[s.moneyText, { color: textValueColor }]}>R${value}</Text>
-        <Text style={s.subtitle}>Vence em {formateData(vence)}</Text>
+        <Text style={[s.moneyText, { color: textValueColor }]}>
+          {formateMoney(value)}
+        </Text>
+        <Text style={s.subtitle}>
+          {t("due_in")} {formateData(vence)}
+        </Text>
         <View style={s.statusContainer}>
           {StatusIcon && <StatusIcon color={statusColorValue} size={18} />}
           <Text style={[s.title, { color: statusColorValue }]}>
-            {bill_status}
+            {t(`status_${bill_status.toLowerCase()}`)}
           </Text>
         </View>
       </View>
