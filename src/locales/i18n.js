@@ -22,14 +22,14 @@ const resources = {
     summary: ptSummary,
     empty: ptEmpty,
     card: ptCard,
-    newbil: ptNewBill,
+    newbill: ptNewBill,
   },
   en: {
     onboarding: enOnboarding,
     summary: enSummary,
     empty: enEmpty,
     card: enCard,
-    newbil: enNewBill,
+    newbill: enNewBill,
   }
 };
 
