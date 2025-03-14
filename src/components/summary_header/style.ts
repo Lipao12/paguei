@@ -15,6 +15,33 @@ export const s = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
+  containerTitle:{
+    alignItems:"center",
+    flexGrow: 1,
+  },
+  headerTitle:{
+    fontSize: 26,
+    fontFamily: fontFamily.bold,
+    color: colors.gray[200],
+    
+  },
+  imageButton:{
+    borderWidth: 2,
+    borderColor: colors.gray[200],
+    borderRadius: 50,
+    overflow: 'hidden'
+  },
+  image:{
+    width: 30, 
+    height: 30
+  },
+  headerRow: {
+    flexDirection: "row",
+    width:"100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 15, 
+  },
   monthTitle: {
     fontSize: 15,
     fontWeight: "bold",
@@ -73,18 +100,5 @@ export const s = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: colors.gray[600],
-  },
-  headerTitle:{
-    fontSize: 26,
-    fontFamily: fontFamily.bold,
-    color: colors.gray[200],
-    marginBottom: 30,
-  },
-  headerRow: {
-    flexDirection: "row",
-    width:"100%",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 15, 
   },
 });

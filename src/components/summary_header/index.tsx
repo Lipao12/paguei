@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, PressableProps, Text, View } from "react-native";
-import { Button } from "../button";
+import { ButtonLocale } from "../button_locale";
 import { s } from "./style";
 
 type Props = PressableProps & {
@@ -85,38 +85,22 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
     i18n.changeLanguage(newLang);
   };
 
-  useEffect(() => {
-    toggleLanguage();
-  }, []);
-
-  console.log(t("months"));
-
   return (
     <View style={s.container}>
       {/* Título */}
       <View
         style={{
-          flexDirection: "column",
+          flexDirection: "row",
           marginHorizontal: 10,
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 30,
         }}
       >
-        <View style={{ alignItems: "center" }}>
+        <View style={s.containerTitle}>
           <Text style={[s.headerTitle]}>{t("title")}</Text>
         </View>
-        <Button
-          onPress={toggleLanguage}
-          style={{
-            height: 20,
-            width: 60,
-            backgroundColor: colors.gray[200],
-          }}
-        >
-          <Button.Title style={{ color: colors.gray[500] }}>
-            Idioma
-          </Button.Title>
-        </Button>
+        <ButtonLocale toggleLanguage={toggleLanguage} />
       </View>
 
       {/* Navegação de Mês */}

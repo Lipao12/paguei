@@ -1,4 +1,5 @@
 import { Button } from "@/components/button";
+import i18n from "@/locales/i18n";
 import { colors } from "@/styles/colors";
 import { Bill } from "@/types"; // Importe o novo type
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -129,7 +130,7 @@ export default function RegisterBill() {
 
   const formateData = (dataString: string) => {
     const data = new Date(dataString);
-    return data.toLocaleDateString("pt-BR", {
+    return data.toLocaleDateString(i18n.language, {
       day: "numeric",
       month: "long",
       year: "numeric",
