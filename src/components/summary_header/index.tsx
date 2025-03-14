@@ -22,6 +22,37 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
 
+  const mounth =
+    i18n.language === "pt"
+      ? [
+          "Janeiro",
+          "Fevereiro",
+          "Março",
+          "Abril",
+          "Maio",
+          "Junho",
+          "Julho",
+          "Agosto",
+          "Setembro",
+          "Outubro",
+          "Novembro",
+          "Dezembro",
+        ]
+      : [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+
   useEffect(() => {
     onSelectMounth(currentMonth);
   }, [currentMonth, onSelectMounth]);
@@ -94,7 +125,7 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
           <Ionicons name="chevron-back" size={20} color={colors.gray[200]} />
         </Pressable>
 
-        <Text style={s.monthTitle}>{t("months")[currentMonth]}</Text>
+        <Text style={s.monthTitle}>{mounth[currentMonth]}</Text>
 
         <Pressable onPress={() => handleChangeMonth("next")}>
           <Ionicons name="chevron-forward" size={20} color={colors.gray[200]} />

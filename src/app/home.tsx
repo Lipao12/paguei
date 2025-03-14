@@ -4,7 +4,7 @@ import { SummaryHeader } from "@/components/summary_header";
 import { loadBills } from "@/services/bill";
 import NotificationService from "@/services/notifications";
 import { colors } from "@/styles/colors";
-import { Bill } from "@/types";
+import { Bill, BillStatus } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
@@ -123,8 +123,14 @@ export default function Index() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      if (dueDate < today && bill.status !== "Pago") {
-        return { ...bill, status: "Atrasado" };
+      console.log("--- --- --- ---");
+      console.log(today, dueDate);
+      console.log(dueDate < today);
+      console.log(bill.status);
+
+      if (dueDate < today && bill.status != "paid") {
+        console.log("Entrei");
+        return { ...bill, status: "overdue" };
       }
       return bill;
     });
@@ -153,11 +159,24 @@ export default function Index() {
   };
 
   const toggleBillStatus = async (id: string) => {
-    const updatedBills = bills.map((bill) =>
-      bill.id === id
-        ? { ...bill, status: bill.status !== "paid" ? "paid" : "pending" }
-        : bill
-    );
+    const updatedBills = bills.map((bill) => {
+      const dueDate = new Date(bill.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return bill.id === id
+        ? {
+            ...bill,
+            status:
+              bill.status != "paid"
+                ? "paid"
+                : today > dueDate
+                ? "overdue"
+                : ("pending" as BillStatus),
+          }
+        : bill;
+    });
     setBills(updatedBills);
     await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
   };
@@ -174,8 +193,6 @@ export default function Index() {
     filterBillsByMonth(bills, selectedMonth),
     selectedFilter
   );
-  console.log("Qnt: ", bills.length);
-  console.log("Filter: ", selectedFilter);
 
   useEffect(() => {
     const initializeNotifications = async () => {
@@ -203,32 +220,10 @@ export default function Index() {
       setBills(loadedBills);
 
       loadedBills.forEach((bill) => {
-        if (bill.status !== "Pago") {
+        if (bill.status !== "paid") {
           scheduleDueDateNotification(bill);
         }
       });
-    };
-
-    initializeNotifications();
-  }, []);
-
-  useEffect(() => {
-    const initializeNotifications = async () => {
-      await NotificationService.configureNotificationChannel();
-      const hasPermission = await NotificationService.requestPermissions();
-
-      if (hasPermission) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: "Lembrete de Pagamento",
-            body: "A conta de luz vence amanhã!",
-            sound: "default",
-          },
-          trigger: {
-            date: new Date(Date.now() + 120000), // 1 minuto no futuro
-          },
-        });
-      }
     };
 
     initializeNotifications();
