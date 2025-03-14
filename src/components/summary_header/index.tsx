@@ -1,6 +1,6 @@
 import { colors } from "@/styles/colors";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, PressableProps, Text, View } from "react-native";
 import { s } from "./style"; // Importando os estilos
 
@@ -32,6 +32,14 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("Todas");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth()); // Pega o mês atual
 
+  useEffect(() => {
+    onSelectMounth(currentMonth);
+  }, [currentMonth, onSelectMounth]);
+
+  useEffect(() => {
+    onSelectFilter(selectedFilter === "A Pagar");
+  }, [selectedFilter, onSelectFilter]);
+
   function handleChangeMonth(direction: "prev" | "next") {
     setCurrentMonth((prev) => {
       const newMonth =
@@ -42,7 +50,7 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
           : prev === 11
           ? 0
           : prev + 1;
-      onSelectMounth(newMonth); // Chama o onSelectMounth diretamente com o novo mês
+      //onSelectMounth(newMonth); // Chama o onSelectMounth diretamente com o novo mês
       return newMonth;
     });
   }
@@ -51,7 +59,6 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
     setSelectedFilter(filter as FilterType);
     onSelectFilter(filter === "Todas" ? false : true);
   }
-
   return (
     <View style={s.container}>
       {/* Título + Navegação */}

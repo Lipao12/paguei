@@ -30,21 +30,6 @@ export const s = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  action_buttons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 15,
-    marginVertical: "auto",
-  },
-  buttonAction: {
-    padding: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: colors.gray[200],
-    justifyContent: "center",
-    alignItems: "center",
-  },
   title: {
     fontSize: 16,
     fontFamily: fontFamily.semiBold,
@@ -67,5 +52,25 @@ export const s = StyleSheet.create({
   },
   nameSelected: {
     color: colors.gray[100],
+  },
+  container_action_button:{
+    flexDirection: "column",
+    justifyContent:"space-between",
+    paddingVertical: 10,
+  },
+  action_buttons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 15,
+    marginVertical: "auto",
+  },
+  buttonAction: {
+    padding: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: colors.gray[200],
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

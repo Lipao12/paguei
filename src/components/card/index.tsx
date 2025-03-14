@@ -5,18 +5,26 @@ import {
   IconClock,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { Alert, Pressable, PressableProps, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  PressableProps,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { s } from "./style";
-
-type BillStatus = "Pendente" | "Pago" | "Atrasado";
+import { BillStatus } from "@/types";
 
 type Props = PressableProps & {
   id: string;
   name: string;
   value: string;
   vence: string;
-  bill_status: string;
+  bill_status: BillStatus;
+  isNotificationsEnabled?: boolean;
   onToggleStatus: () => void;
+  onSetNotifications: () => void;
   onDelete: () => void;
 };
 
@@ -26,8 +34,10 @@ export function Card({
   value,
   vence,
   bill_status,
+  isNotificationsEnabled,
   onDelete,
   onToggleStatus,
+  onSetNotifications,
   ...rest
 }: Props) {
   // Função para calcular a diferença de dias
@@ -100,17 +110,27 @@ export function Card({
         </View>
       </View>
 
-      <View style={s.action_buttons}>
-        <Pressable {...rest} style={s.buttonAction} onPress={onToggleStatus}>
-          <ButtonStatusIcon color={ButtonstatusColor} size={24} />
-        </Pressable>
-        <Pressable
-          {...rest}
-          style={s.buttonAction}
-          onPress={() => confirmDelete(id)}
-        >
-          <IconTrash color={colors.red.base} size={24} />
-        </Pressable>
+      <View style={s.container_action_button}>
+        <View style={s.action_buttons}>
+          <Pressable {...rest} style={s.buttonAction} onPress={onToggleStatus}>
+            <ButtonStatusIcon color={ButtonstatusColor} size={24} />
+          </Pressable>
+          <Pressable
+            {...rest}
+            style={s.buttonAction}
+            onPress={() => confirmDelete(id)}
+          >
+            <IconTrash color={colors.red.base} size={24} />
+          </Pressable>
+        </View>
+        <View>
+          <Switch
+            value={isNotificationsEnabled}
+            onValueChange={onSetNotifications}
+            trackColor={{ false: "#767577", true: colors.green.base }}
+            thumbColor={value ? "#FFF" : "#FFF"}
+          />
+        </View>
       </View>
     </View>
   );

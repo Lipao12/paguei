@@ -30,6 +30,29 @@ export default function RegisterBill() {
     }
   };
 
+  async function scheduleDueDateNotification(bill: Bill) {
+    if (bill.reminderAt) {
+      const reminderDate = new Date(bill.reminderAt); // Usa a data de reminderAt
+      const today = new Date();
+
+      if (reminderDate > today) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Lembrete de Pagamento",
+            body: `A conta "${bill.name}" vence em 3 dias!`,
+            sound: "default",
+            data: { billId: bill.id },
+          },
+          trigger: {
+            date: reminderDate,
+          },
+        });
+
+        console.log(`Notificação agendada para a conta "${bill.name}"`);
+      }
+    }
+  }
+
   async function onSubmit(data: Bill) {
     setLoading(true);
     console.log(data);
@@ -83,6 +106,10 @@ export default function RegisterBill() {
         const bills: Bill[] = storedBills ? JSON.parse(storedBills) : [];
 
         const updatedBills = [...bills, newBill];
+
+        if (data.reminderAt) {
+          await scheduleDueDateNotification(newBill);
+        }
 
         // Salva de volta no AsyncStorage
         await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
@@ -193,9 +220,20 @@ export default function RegisterBill() {
             render={({ field: { onChange, value } }) => (
               <Switch
                 value={!!value}
-                onValueChange={(enabled) =>
-                  onChange(enabled ? new Date().toISOString() : "")
-                }
+                //onValueChange={(enabled) =>
+                //  onChange(enabled ? new Date().toISOString() : "")
+                //}
+                onValueChange={(enabled) => {
+                  if (enabled) {
+                    const dueDate = new Date(selectedDate);
+                    const reminderDate = new Date(
+                      dueDate.getTime() - 3 * 24 * 60 * 60 * 1000 // 3 dias antes
+                    );
+                    onChange(reminderDate.toISOString());
+                  } else {
+                    onChange("");
+                  }
+                }}
                 trackColor={{ false: "#767577", true: colors.green.base }}
                 thumbColor={value ? "#FFF" : "#FFF"}
               />

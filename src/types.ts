@@ -6,11 +6,13 @@ export interface Bill {
     dueDate: string;
     paid: boolean;
     reminderAt?: string;
+    isNotifing?: boolean;
     createdAt: string;
-    updatedAt: string;
     recurring: boolean;
-    status: string;
+    status: BillStatus;
   }
   
   export type FilterStatus = "all" | "paid" | "unpaid";
+
+  export type BillStatus = "Pendente" | "Pago" | "Atrasado";
   
