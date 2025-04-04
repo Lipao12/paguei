@@ -1,103 +1,116 @@
+
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { Bill } from '@/types';
 
-// Configura o comportamento das notificações
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true, // Exibe um alerta quando a notificação é recebida
-    shouldPlaySound: true, // Toca um som ao receber a notificação
-    shouldSetBadge: true, // Atualiza o ícone do app com um badge (número)
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
   }),
 });
 
 class NotificationService {
-  // Solicita permissão para notificações
-  async requestPermissions() {
+  private static instance: NotificationService;
+  private initialized: boolean = false;
+
+  static getInstance(): NotificationService {
+    if (!NotificationService.instance) {
+      NotificationService.instance = new NotificationService();
+    }
+    return NotificationService.instance;
+  }
+
+  async initialize() {
+    if (this.initialized) return;
+
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') {
-      alert('Você precisa permitir notificações para receber lembretes!');
-      return false;
+      throw new Error('Notification permissions not granted');
     }
-    return true;
-  }
 
-  // Configura o canal de notificação (Android)
-  async configureNotificationChannel() {
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('bill_reminders', {
-        name: 'Lembretes de Contas',
-        importance: Notifications.AndroidImportance.HIGH, // Prioridade alta
-        sound: 'default', // Som padrão
-        vibrationPattern: [0, 250, 250, 250], // Padrão de vibração
-        lightColor: '#FF0000', // Cor do LED (se suportado)
+      await Notifications.setNotificationChannelAsync('bills', {
+        name: 'Bill Reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: 'default',
+        enableVibrate: true,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
       });
     }
+
+    this.initialized = true;
   }
 
-  // Agenda uma notificação para uma data específica
-  async scheduleNotification(title: string, body: string, date: Date) {
-    try {
-      // Verifica se a data é futura
-      if (date <= new Date()) {
-        console.warn('A data da notificação deve ser no futuro.');
-        return;
-      }
+  async scheduleBillNotification(bill: Bill) {
+    if (!this.initialized) {
+      await this.initialize();
+    }
 
-      // Agenda a notificação
-      const notificationId = await Notifications.scheduleNotificationAsync({
+    if (bill.paid || !bill.isNotifing) return;
+
+    const dueDate = new Date(bill.dueDate);
+    const notificationId = `bill-${bill.id}`;
+
+    // Cancel any existing notifications for this bill
+    await this.cancelNotification(notificationId);
+
+    // Schedule based on bill status
+    if (bill.status === 'overdue') {
+      await Notifications.scheduleNotificationAsync({
+        identifier: notificationId,
         content: {
-          title,
-          body,
-          sound: 'default', // Som ao receber a notificação
-          data: { billId: '123' }, // Dados adicionais (opcional)
+          title: 'Conta Atrasada',
+          body: `A conta ${bill.name} está atrasada!`,
+          data: { billId: bill.id },
+          sound: 'default',
         },
         trigger: {
-          date, // Data e hora para exibir a notificação
+          channelId: 'bills',
+          seconds: 60 * 60 * 24, // Daily reminder
+          repeats: true,
         },
       });
-
-      console.log('Notificação agendada com ID:', notificationId);
-      return notificationId;
-    } catch (error) {
-      console.error('Erro ao agendar notificação:', error);
-      throw error;
+    } else {
+      // Schedule reminders 3 days and 1 day before due date
+      const reminderDays = [3, 1];
+      
+      for (const days of reminderDays) {
+        const reminderDate = new Date(dueDate);
+        reminderDate.setDate(dueDate.getDate() - days);
+        
+        if (reminderDate > new Date()) {
+          await Notifications.scheduleNotificationAsync({
+            identifier: `${notificationId}-${days}d`,
+            content: {
+              title: 'Lembrete de Pagamento',
+              body: `A conta ${bill.name} vence em ${days} dia${days > 1 ? 's' : ''}!`,
+              data: { billId: bill.id },
+              sound: 'default',
+            },
+            trigger: {
+              channelId: 'bills',
+              date: reminderDate,
+            },
+          });
+        }
+      }
     }
   }
 
-  // Cancela uma notificação agendada
-  async cancelNotification(notificationId: string) {
-    try {
-      await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log('Notificação cancelada:', notificationId);
-    } catch (error) {
-      console.error('Erro ao cancelar notificação:', error);
-      throw error;
-    }
+  async cancelNotification(identifier: string) {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
   }
 
-  // Cancela todas as notificações agendadas
   async cancelAllNotifications() {
-    try {
-      await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('Todas as notificações foram canceladas.');
-    } catch (error) {
-      console.error('Erro ao cancelar todas as notificações:', error);
-      throw error;
-    }
+    await Notifications.cancelAllScheduledNotificationsAsync();
   }
 
-  // Obtém todas as notificações agendadas
   async getPendingNotifications() {
-    try {
-      const notifications = await Notifications.getAllScheduledNotificationsAsync();
-      console.log('Notificações pendentes:', notifications);
-      return notifications;
-    } catch (error) {
-      console.error('Erro ao buscar notificações pendentes:', error);
-      throw error;
-    }
+    return await Notifications.getAllScheduledNotificationsAsync();
   }
 }
 
-// Exporta uma instância do serviço
-export default new NotificationService();
+export default NotificationService.getInstance();
