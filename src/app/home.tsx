@@ -1,18 +1,23 @@
 import { Card } from "@/components/card";
 import { EmptyState } from "@/components/empty_state";
 import { SummaryHeader } from "@/components/summary_header";
-import { loadBills } from "@/services/bill";
-import NotificationService from "@/services/notifications";
+import {
+  getNotificationId,
+  loadBills,
+  removeNotificationId,
+} from "@/services/bill";
 import { colors } from "@/styles/colors";
 import { Bill, BillStatus } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+
+import { SchedulableTriggerInputTypes } from "expo-notifications";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
+  Button,
   FlatList,
-  Platform,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
@@ -85,6 +90,25 @@ async function scheduleDueDateNotification(bill: Bill) {
   }
 }
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+Notifications.scheduleNotificationAsync({
+  content: {
+    title: "Time's up!",
+    body: "Change sides!",
+  },
+  trigger: {
+    type: SchedulableTriggerInputTypes.TIME_INTERVAL,
+    seconds: 60,
+  },
+});
+
 export default function Index() {
   console.log("Página - Home");
   const router = useRouter();
@@ -94,8 +118,6 @@ export default function Index() {
   /*const [totalAmount, setTotalAmount] = useState(0);
   const [paidAmount, setPaidAmount] = useState(0);
   const [toPayAmount, setToPayAmount] = useState(0);*/
-
-  console.log("Mes selecionado: ", selectedMonth);
 
   /*useEffect(() => {
     async function loadBills() {
@@ -123,13 +145,7 @@ export default function Index() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      console.log("--- --- --- ---");
-      console.log(today, dueDate);
-      console.log(dueDate < today);
-      console.log(bill.status);
-
       if (dueDate < today && bill.status != "paid") {
-        console.log("Entrei");
         return { ...bill, status: "overdue" };
       }
       return bill;
@@ -142,6 +158,11 @@ export default function Index() {
         const storedBills = await loadBills();
         const updatedBills = updateBillStatus(storedBills);
         setBills(updatedBills);
+
+        // Notificações
+        //updatedBills.forEach((bill) => {
+        //  if (!bill.paid) scheduleBillNotifications(bill);
+        //});
       }
 
       fetchData();
@@ -159,11 +180,17 @@ export default function Index() {
   };
 
   const toggleBillStatus = async (id: string) => {
-    const updatedBills = bills.map((bill) => {
+    const updatedBills = bills.map(async (bill) => {
       const dueDate = new Date(bill.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
+      const notificationId = await getNotificationId(bill.id);
+      if (notificationId) {
+        await Notifications.cancelScheduledNotificationAsync(notificationId);
+        await removeNotificationId(bill.id);
+      }
 
       return bill.id === id
         ? {
@@ -177,7 +204,8 @@ export default function Index() {
           }
         : bill;
     });
-    setBills(updatedBills);
+    const updatedBill = bills.filter((bill) => bill.id === id);
+    setBills(updatedBill);
     await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
   };
 
@@ -194,7 +222,19 @@ export default function Index() {
     selectedFilter
   );
 
-  useEffect(() => {
+  /*useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        // Atualizar status das contas quando notificação for recebida
+        const updatedBills = updateBillStatus(bills);
+        setBills(updatedBills);
+      }
+    );
+
+    return () => subscription.remove();
+  }, [bills]);
+
+ useEffect(() => {
     const initializeNotifications = async () => {
       console.log("IDsk");
       // Solicita permissão para notificações
@@ -227,9 +267,9 @@ export default function Index() {
     };
 
     initializeNotifications();
-  }, []);
+  }, []);*/
 
-  const handleScheduleNotification = async () => {
+  /*const handleScheduleNotification = async () => {
     const title = "Lembrete de Pagamento";
     const body = "A conta de luz vence amanhã!";
     const date = new Date(Date.now() + 60000); // 1 minuto no futuro
@@ -239,9 +279,9 @@ export default function Index() {
 
   const handleCancelAllNotifications = async () => {
     await NotificationService.cancelAllNotifications();
-  };
+  };*/
 
-  useEffect(() => {
+  /*useEffect(() => {
     // Carrega as contas e agenda notificações
     const fetchBills = async () => {
       const loadedBills = await loadBills();
@@ -261,10 +301,67 @@ export default function Index() {
     };
 
     fetchBills();
-  }, []);
+  }, []);*/
+
+  const triggerTestNotification = async () => {
+    const permission = await Notifications.getPermissionsAsync();
+    if (!permission.granted) {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permissão de notificação negada");
+        alert(
+          "Permissões de notificação negadas. Por favor, permita nas configurações."
+        );
+        return;
+      }
+    }
+
+    await Notifications.setNotificationChannelAsync("new_emails", {
+      name: "E-mail notifications",
+      importance: Notifications.AndroidImportance.HIGH,
+    });
+
+    // Cancelar todas as notificações agendadas antes de agendar uma nova
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Notificação marcada",
+          body: "I'm so proud of myself",
+        },
+        trigger: {
+          channelId: "new_emails",
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: 30,
+        },
+      });
+      alert("Notificação agendada para daqui 30 segundos!");
+    } catch (error) {
+      console.log("Erro ao agendar notificação:", error);
+      alert("Erro ao agendar notificação. Verifique as permissões.");
+    }
+  };
+  const triggerCleanNotification = async () => {
+    try {
+      // Cancelar todas as notificações agendadas
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      alert("Fila de notificações limpa com sucesso!");
+    } catch (error) {
+      console.log("Erro ao limpar notificações:", error);
+      alert("Erro ao limpar notificações.");
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, paddingBottom: 40, gap: 40 }}>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <Button title="Testar Notificação" onPress={triggerTestNotification} />
+        <Button
+          title="Limpar Fila de Notificação"
+          onPress={triggerCleanNotification}
+        />
+      </View>
       <View style={{ flex: 1, gap: 10 }}>
         <SummaryHeader
           onSelectFilter={setSelectedFilter}

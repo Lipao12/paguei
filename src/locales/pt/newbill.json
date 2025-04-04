@@ -8,5 +8,9 @@
   "recurringLabel": "Recorrente",
   "reminderLabel": "Receber Notificação",
   "buttonSubmit": "Cadastrar",
-  "saving": "Salvando..."
+  "saving": "Salvando...",
+  "success": "Sucesso",
+  "successText": "Conta cadastrada com sucesso!",
+  "error":"Erro",
+  "errorText":"Não foi possível salvar a conta."
 }

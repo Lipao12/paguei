@@ -56,22 +56,24 @@ export const s = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderRadius: 8,
-    backgroundColor: "#E5E5E5",
+    backgroundColor: colors.green.base,
     marginHorizontal: 8,
     justifyContent: "center",
     alignItems: "center",
   },
   activeFilter: {
-    backgroundColor: colors.green.base,
+    backgroundColor: "#E5E5E5",
+    borderWidth:2,
+    borderColor: colors.green.base
   },
   filterText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: colors.green.dark,
+    color: colors.gray[100],
     textTransform: "capitalize",
   },
   activeText: {
-    color: "#FFF",
+    color: colors.green.base,
   },
   valuesContainer: {
     flexDirection: "row",

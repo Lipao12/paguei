@@ -1,21 +1,83 @@
 import { Button } from "@/components/button";
 import i18n from "@/locales/i18n";
+import { storeNotificationId } from "@/services/bill";
+import { scheduleBillNotifications } from "@/services/not";
 import { colors } from "@/styles/colors";
 import { Bill } from "@/types"; // Importe o novo type
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { default as DateTimePicker } from "@react-native-community/datetimepicker";
 import { IconArrowLeft, IconCalendarSearch } from "@tabler/icons-react-native";
+import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Alert, Switch, Text, TextInput, View } from "react-native";
 
+async function scheduleDueDateNotification(bill: Bill) {
+  const existingNotificationId = await getNotificationId(bill.id);
+  if (existingNotificationId) {
+    console.log(`Notificação já agendada para a conta ${bill.id}. Pulando.`);
+    return;
+  }
+
+  const dueDate = new Date(bill.dueDate);
+  const today = new Date();
+
+  let trigger;
+  let content;
+
+  if (today > dueDate) {
+    const notificationDate = new Date(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate(),
+      20, // Hora
+      5, // Minuto
+      0 // Segundo
+    );
+    if (today > notificationDate) {
+      notificationDate.setDate(notificationDate.getDate() + 1); // Agenda para amanhã
+    }
+    trigger = {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: notificationDate,
+    };
+    content = {
+      title: "Teste",
+      body: `A conta "${bill.name}" venceu!`,
+      sound: "default",
+      data: { billId: bill.id },
+    };
+  } else {
+    const reminderDate = new Date(dueDate);
+    reminderDate.setDate(reminderDate.getDate() - 1);
+    trigger = {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date: reminderDate,
+    };
+    content = {
+      title: "Lembrete de Pagamento",
+      body: `A conta "${bill.name}" vence amanhã!`,
+      sound: "default",
+      data: { billId: bill.id },
+    };
+  }
+
+  const notificationId = await Notifications.scheduleNotificationAsync({
+    content,
+    trigger,
+  });
+
+  // Armazena o ID de notificação com o ID da conta
+  await storeNotificationId(bill.id, notificationId);
+}
+
 export default function RegisterBill() {
   console.log("Page - Create Bill");
   const { t } = useTranslation("newbill");
   const router = useRouter();
-  const { control, handleSubmit, reset } = useForm<Bill>();
+  const { control, handleSubmit, reset, setValue } = useForm<Bill>();
   const [loading, setLoading] = useState(false);
   //const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -29,16 +91,42 @@ export default function RegisterBill() {
     setShowDatePicker(false);
     if (date) {
       setSelectedDate(date);
-      reset({ dueDate: date.toISOString() });
+      setValue("dueDate", date.toISOString()); //({ dueDate: date.toISOString() });
     }
   };
 
   async function scheduleDueDateNotification(bill: Bill) {
-    if (bill.reminderAt) {
-      const reminderDate = new Date(bill.reminderAt); // Usa a data de reminderAt
-      const today = new Date();
+    if (bill.dueDate) {
+      const dueDate = new Date(bill.dueDate); // Data de vencimento
+      const reminderDate = new Date(
+        dueDate.getTime() - 3 * 24 * 60 * 60 * 1000
+      ); // 3 dias antes da dueDate
+      const today = new Date(); // Data atual
 
+      console.log("Data de vencimento: ", dueDate);
+      console.log("Data do lembrete (3 dias antes): ", reminderDate);
+
+      // Verifica se a data do lembrete ainda não passou
       if (reminderDate > today) {
+        // Define a hora e os minutos da notificação (exemplo: 12:11)
+        const notificationDate = new Date(
+          reminderDate.getFullYear(),
+          reminderDate.getMonth(),
+          reminderDate.getDate(),
+          12, // Hora (12 para 12:00)
+          13, // Minutos (11 para 12:11)
+          0 // Segundos
+        );
+
+        console.log("Data da Notificação: ", notificationDate);
+
+        // Define o objeto trigger corretamente
+        const trigger: Notifications.DateTriggerInput = {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: notificationDate.getTime(), // Timestamp em milissegundos
+        };
+
+        // Agenda a notificação
         await Notifications.scheduleNotificationAsync({
           content: {
             title: "Lembrete de Pagamento",
@@ -46,13 +134,17 @@ export default function RegisterBill() {
             sound: "default",
             data: { billId: bill.id },
           },
-          trigger: {
-            date: reminderDate,
-          },
+          trigger,
         });
 
-        console.log(`Notificação agendada para a conta "${bill.name}"`);
+        console.log(
+          `Notificação agendada para a conta "${bill.name}" em ${notificationDate}`
+        );
+      } else {
+        console.log("A data do lembrete já passou. Notificação não agendada.");
       }
+    } else {
+      console.log("Data de vencimento não definida. Notificação não agendada.");
     }
   }
 
@@ -62,67 +154,61 @@ export default function RegisterBill() {
     try {
       // Verifica se a conta é recorrente
       if (data.recurring) {
-        const year = selectedDate.getFullYear(); // Ano da data selecionada
-        const startMonth = selectedDate.getMonth(); // Mês da data selecionada
+        const year = selectedDate.getFullYear();
+        const startMonth = selectedDate.getMonth();
 
-        // Array para armazenar todas as contas recorrentes
         const recurringBills: Bill[] = [];
 
-        // Cria uma conta para cada mês, de startMonth até dezembro (mês 11)
         for (let month = startMonth; month <= 11; month++) {
-          const dueDate = new Date(year, month, selectedDate.getDate()); // Data de vencimento para o mês atual
+          const dueDate = new Date(year, month, selectedDate.getDate());
 
           const newBill: Bill = {
             ...data,
-            id: String(Date.now() + month), // ID único para cada conta
+            id: String(Date.now() + month),
             paid: false,
-            status: "Pendente",
+            status: "pending",
             createdAt: new Date().toISOString(),
-            dueDate: dueDate.toISOString(), // Data de vencimento formatada
+            dueDate: dueDate.toISOString(),
           };
 
           recurringBills.push(newBill); // Adiciona a conta ao array
         }
+        recurringBills.forEach((bill) => scheduleBillNotifications(bill));
 
-        // Contas já criadas
         const storedBills = await AsyncStorage.getItem("bills");
         const bills: Bill[] = storedBills ? JSON.parse(storedBills) : [];
 
-        // Adiciona todas as contas recorrentes ao array existente
         const updatedBills = [...bills, ...recurringBills];
 
-        // Salva de volta no AsyncStorage
         await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
       } else {
-        // Se não for recorrente, cria apenas uma conta
         const newBill: Bill = {
           ...data,
           id: String(Date.now()),
           paid: false,
-          status: "Pendente",
+          status: "pending",
           createdAt: new Date().toISOString(),
           dueDate: selectedDate.toISOString(),
         };
 
-        // Contas já criadas
+        console.log(data);
+
         const storedBills = await AsyncStorage.getItem("bills");
         const bills: Bill[] = storedBills ? JSON.parse(storedBills) : [];
 
         const updatedBills = [...bills, newBill];
 
-        if (data.reminderAt) {
-          await scheduleDueDateNotification(newBill);
-        }
+        await scheduleBillNotifications(newBill);
 
-        // Salva de volta no AsyncStorage
         await AsyncStorage.setItem("bills", JSON.stringify(updatedBills));
+        scheduleDueDateNotification(newBill);
       }
 
-      Alert.alert("Sucesso", "Conta cadastrada com sucesso!");
+      Alert.alert(t("success"), t("successText"));
       reset();
       router.back();
     } catch (error) {
-      Alert.alert("Erro", "Não foi possível salvar a conta.");
+      Alert.alert(t("error"), t("errorText"));
     } finally {
       setLoading(false);
     }
@@ -215,7 +301,7 @@ export default function RegisterBill() {
           />
         </View>
 
-        <View style={s.switchContainer}>
+        {/*<View style={s.switchContainer}>
           <Text style={s.label}>{t("reminderLabel")}</Text>
           <Controller
             control={control}
@@ -242,7 +328,7 @@ export default function RegisterBill() {
               />
             )}
           />
-        </View>
+        </View>*/}
 
         <Button
           style={s.button}

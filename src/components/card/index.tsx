@@ -7,14 +7,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react-native";
 import { useTranslation } from "react-i18next";
-import {
-  Alert,
-  Pressable,
-  PressableProps,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { Alert, Pressable, PressableProps, Text, View } from "react-native";
 import { s } from "./style";
 
 type Props = PressableProps & {
@@ -144,14 +137,6 @@ export function Card({
           >
             <IconTrash color={colors.red.base} size={24} />
           </Pressable>
-        </View>
-        <View>
-          <Switch
-            value={isNotificationsEnabled}
-            onValueChange={onSetNotifications}
-            trackColor={{ false: "#767577", true: colors.green.base }}
-            thumbColor={value ? "#FFF" : "#FFF"}
-          />
         </View>
       </View>
     </View>

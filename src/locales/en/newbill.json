@@ -8,6 +8,10 @@
     "recurringLabel": "Recurring",
     "reminderLabel": "Receive Notification",
     "buttonSubmit": "Register",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "success": "Success",
+    "successText": "Account successfully registered!",
+    "error": "Error",
+    "errorText": "Could not save the account."
   }
   

@@ -19,6 +19,8 @@ type FilterType = "all" | "toPay";
 export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
   const { t, i18n } = useTranslation("summary");
 
+  const todayYear = new Date().getFullYear();
+
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
 
@@ -117,7 +119,7 @@ export function SummaryHeader({ onSelectMounth, onSelectFilter }: Props) {
       </View>
 
       <View style={{ marginTop: 7 }}>
-        <Text style={[s.monthTitle, { fontSize: 18 }]}>2025</Text>
+        <Text style={[s.monthTitle, { fontSize: 18 }]}>{todayYear}</Text>
       </View>
 
       {/* Filtros */}

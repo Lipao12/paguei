@@ -34,8 +34,6 @@ export const loadBills = async (): Promise<Bill[]> => {
         const billDate = new Date(bill.dueDate);
         return billDate >= sixMonthsAgo || !bill.paid;
       });
-
-      console.log("As contas: ", filteredBills.length, filteredBills)
   
       // Atualizar armazenamento se houve mudanças
       if (filteredBills.length !== parsedBills.length) {
@@ -85,3 +83,28 @@ export const loadBills = async (): Promise<Bill[]> => {
       console.error("Erro ao atualizar conta:", error);
     }
   }
+
+  export const storeNotificationId = async ({billId, notificationId}:any) => {
+    try {
+      await AsyncStorage.setItem(`notificationId_${billId}`, notificationId);
+    } catch (error) {
+      console.log('Erro ao armazenar ID de notificação:', error);
+    }
+  };
+
+  export const getNotificationId = async ({billId}:any) => {
+    try {
+      return await AsyncStorage.getItem(`notificationId_${billId}`);
+    } catch (error) {
+      console.log('Erro ao obter ID de notificação:', error);
+      return null;
+    }
+  };
+  
+ export const removeNotificationId = async ({billId}:any) => {
+    try {
+      await AsyncStorage.removeItem(`notificationId_${billId}`);
+    } catch (error) {
+      console.log('Erro ao remover ID de notificação:', error);
+    }
+  };
